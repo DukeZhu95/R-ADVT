@@ -12,18 +12,29 @@ import java.util.Objects;
 public class Player extends Entity{
     GamePanel gp;
     KeyboardHandler KeyboardHandler;
+    public final int screenX;
+    public final int screenY;
 
     public Player (GamePanel gp, KeyboardHandler KeyboardHandler) {
         this.gp = gp;
         this.KeyboardHandler = KeyboardHandler;
+
+        screenX = gp.ScreenWidth / 2 - gp.tileSize / 2;
+        screenY = gp.ScreenHeight / 2 - gp.tileSize / 2;
+
+        solidArea = new Rectangle();
+        solidArea.x = 18;
+        solidArea.y = 32;
+        solidArea.width = 70;
+        solidArea.height = 70;
 
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
+        worldX = gp.tileSize * 23;
+        worldY = gp.tileSize * 21;
         speed = 4;
         direction = "down";
     }
@@ -49,35 +60,69 @@ public class Player extends Entity{
     }
 
     public void update() {
-        if (KeyboardHandler.upPressed) {
-            direction = "up";
-            y -= speed;
-        }
-        if (KeyboardHandler.downPressed) {
-            direction = "down";
-            y += speed;
-        }
-        if (KeyboardHandler.leftPressed) {
-            direction = "left";
-            x -= speed;
-        }
-        if (KeyboardHandler.rightPressed) {
-            direction = "right";
-            x += speed;
-        }
+        if (KeyboardHandler.upPressed || KeyboardHandler.downPressed || KeyboardHandler.leftPressed || KeyboardHandler.rightPressed) {
 
-        spriteCounter++;
-        if (spriteCounter > 15) {
-            if (spriteNum == 1) {
-                spriteNum = 2;
-            } else if (spriteNum == 2) {
-                spriteNum = 3;
-            } else if (spriteNum == 3) {
-                spriteNum = 1;
+            if (KeyboardHandler.upPressed) {
+                direction = "up";
             }
-            spriteCounter = 0;
+            if (KeyboardHandler.downPressed) {
+                direction = "down";
+            }
+            if (KeyboardHandler.leftPressed) {
+                direction = "left";
+            }
+            if (KeyboardHandler.rightPressed) {
+                direction = "right";
+            }
+
+            // Check for collision
+            collisionOn = false;
+            gp.collisionChecker.checkTile(this);
+
+            // If collision is not detected, move the player
+            if (collisionOn == false) {
+
+                switch (direction) {
+                    case "up":
+                        worldY -= speed;
+                        break;
+                    case "down":
+                        worldY += speed;
+                        break;
+                    case "left":
+                        worldX -= speed;
+                        break;
+                    case "right":
+                        worldX += speed;
+                        break;
+                }
+            }
+
+            // Animate the player
+            spriteCounter++;
+            if (spriteCounter > 15) {
+                if (incrementing) {
+                    if (spriteNum == 1) {
+                        spriteNum = 2;
+                    } else if (spriteNum == 2) {
+                        spriteNum = 3;
+                    } else if (spriteNum == 3) {
+                        spriteNum = 2;
+                        incrementing = false;  // Start decrementing
+                    }
+                } else {
+                    if (spriteNum == 2) {
+                        spriteNum = 1;
+                        incrementing = true;  // Start incrementing again
+                    }
+                }
+                spriteCounter = 0;
+            }
+        } else {
+            spriteNum = 2;  // cease movement
         }
     }
+
 
     public void draw(Graphics2D g2) {
 //        g2.setColor(Color.WHITE);
@@ -124,7 +169,8 @@ public class Player extends Entity{
             }
         }
 
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
     }
 
+    private boolean incrementing = true;
 }
