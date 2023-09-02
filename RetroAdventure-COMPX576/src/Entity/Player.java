@@ -23,7 +23,7 @@ public class Player extends Entity{
         screenY = gp.ScreenHeight / 2 - gp.tileSize / 2;
 
         solidArea = new Rectangle();
-        solidArea.x = 18;
+        solidArea.x = 20;
         solidArea.y = 32;
         solidArea.width = 70;
         solidArea.height = 70;
@@ -80,21 +80,13 @@ public class Player extends Entity{
             gp.collisionChecker.checkTile(this);
 
             // If collision is not detected, move the player
-            if (collisionOn == false) {
+            if (!collisionOn) {
 
                 switch (direction) {
-                    case "up":
-                        worldY -= speed;
-                        break;
-                    case "down":
-                        worldY += speed;
-                        break;
-                    case "left":
-                        worldX -= speed;
-                        break;
-                    case "right":
-                        worldX += speed;
-                        break;
+                    case "up" -> worldY -= speed;
+                    case "down" -> worldY += speed;
+                    case "left" -> worldX -= speed;
+                    case "right" -> worldX += speed;
                 }
             }
 
