@@ -14,6 +14,7 @@ public class Player extends Entity{
     KeyboardHandler KeyboardHandler;
     public final int screenX;
     public final int screenY;
+    int hasKey = 0;
 
     public Player (GamePanel gp, KeyboardHandler KeyboardHandler) {
         this.gp = gp;
@@ -25,6 +26,8 @@ public class Player extends Entity{
         solidArea = new Rectangle();
         solidArea.x = 20;
         solidArea.y = 32;
+        solidAreaDefaultX = solidArea.x;
+        solidAreaDefaultY = solidArea.y;
         solidArea.width = 70;
         solidArea.height = 70;
 
@@ -79,6 +82,10 @@ public class Player extends Entity{
             collisionOn = false;
             gp.collisionChecker.checkTile(this);
 
+            // Check for collision with objects
+            int objIndex = gp.collisionChecker.checkObject(this, true);
+            pickUpObject(objIndex);
+
             // If collision is not detected, move the player
             if (!collisionOn) {
 
@@ -112,6 +119,27 @@ public class Player extends Entity{
             }
         } else {
             spriteNum = 2;  // cease movement
+        }
+    }
+
+    public void pickUpObject(int i) {
+        if (i != 999) {
+
+            String objectName = gp.obj[i].name;
+
+            switch (objectName) {
+                case "key" -> {
+                    gp.obj[i] = null;
+                    hasKey++;
+                }
+                case "door" -> {
+                    if (hasKey > 0) {
+                        gp.obj[i] = null;
+                        hasKey--;
+                    }
+                }
+
+            }
         }
     }
 
